@@ -1,7 +1,7 @@
 {
   "name": "omatvlauncher",
   "productName": "OMATVLauncher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A full-screen home screen for an Omarchy machine plugged into a TV: your AppImages, anything installed, and the settings a living room needs.",
   "main": "src/main.js",
   "desktopName": "omatvlauncher.desktop",
