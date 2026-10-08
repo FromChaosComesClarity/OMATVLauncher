@@ -1,3 +1,12 @@
+/* Poppins, bundled (SIL OFL, fonts/OFL.txt): the TV may well be offline, and
+   the page only loads from itself. */
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 300; font-display: block; src: url("fonts/Poppins-300.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 400; font-display: block; src: url("fonts/Poppins-400.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 500; font-display: block; src: url("fonts/Poppins-500.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 600; font-display: block; src: url("fonts/Poppins-600.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 700; font-display: block; src: url("fonts/Poppins-700.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 800; font-display: block; src: url("fonts/Poppins-800.woff2") format("woff2"); }
+
 /*
  * Sized from the viewport, not from pixels: 1rem is ~16px on a 1080p panel and
  * ~32px on a 4K one, so the same layout reads the same from the sofa on both.
@@ -32,7 +41,7 @@ html, body {
   overflow: hidden;
   background: var(--bg);
   color: var(--fg);
-  font-family: "Inter", "SF Pro Display", "Cantarell", "Noto Sans", "Ubuntu", system-ui, sans-serif;
+  font-family: "Poppins", "Inter", "Noto Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
@@ -134,7 +143,7 @@ body.layered #home { transform: scale(.97); filter: blur(.5rem) brightness(.6); 
   color: var(--accent); margin-bottom: .9rem; height: 1rem;
 }
 #hero-title {
-  margin: 0; font-size: 5.4rem; font-weight: 750; letter-spacing: -.025em; line-height: 1.02;
+  margin: 0; font-size: 5.4rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.02;
   text-shadow: 0 .4rem 2.5rem rgba(0,0,0,.45);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -320,7 +329,7 @@ body.arranging .shelf.system { opacity: .3; }
 #settings-body { padding: 2.4rem 3rem; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 #settings-title { margin: 0 0 1.6rem; font-size: 2.4rem; font-weight: 700; letter-spacing: -.01em; }
 #settings-rows { flex: 1; overflow: hidden; position: relative; }
-.rows-track { display: flex; flex-direction: column; gap: .55rem; transition: transform .4s var(--ease); padding-bottom: 2rem; }
+.rows-track { display: flex; flex-direction: column; gap: .55rem; transition: transform .4s var(--ease); padding: .2rem .2rem 2rem; }
 
 .row {
   display: flex; align-items: center; gap: 1.2rem;
@@ -336,7 +345,9 @@ body.arranging .shelf.system { opacity: .3; }
 .row .hint { font-size: .98rem; margin-top: .25rem; color: color-mix(in srgb, var(--fg) 58%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row .value svg { width: 1.3rem; height: 1.3rem; vertical-align: middle; }
 .row .value { font-size: 1.05rem; font-weight: 700; letter-spacing: .04em; color: color-mix(in srgb, var(--fg) 70%, transparent); white-space: nowrap; }
-.row.focus { background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 .16rem var(--accent); transform: scale(1.01); }
+/* No scale here: rows live in a clipping box (it is what scrolls them), and a
+   row that grows past its own edges gets its highlight shaved off the sides. */
+.row.focus { background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 .16rem var(--accent); }
 .row.danger .label { color: color-mix(in srgb, var(--urgent) 70%, white); }
 .row.disabled { opacity: .45; }
 .row.confirm { box-shadow: inset 0 0 0 .16rem var(--urgent); background: color-mix(in srgb, var(--urgent) 22%, transparent); }
@@ -409,7 +420,7 @@ body.arranging .shelf.system { opacity: .3; }
 }
 .grid-track {
   display: grid; grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr)); gap: 1.3rem;
-  padding: .6rem .6rem 3rem;
+  padding: 1rem 1rem 3rem;
   transition: transform .4s var(--ease);
 }
 .app-card {
