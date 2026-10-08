@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('tv', {
   bluetoothScan: () => ipcRenderer.invoke('bluetoothScan'),
   action: (name, args) => ipcRenderer.invoke('action', name, args),
 
+  menuEntry: () => ipcRenderer.invoke('menuEntry'),
+  setMenuEntry: on => ipcRenderer.invoke('setMenuEntry', on),
+
   hide: () => ipcRenderer.invoke('hide'),
   quit: () => ipcRenderer.invoke('quit'),
 

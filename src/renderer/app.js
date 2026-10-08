@@ -534,6 +534,7 @@ async function loadSection() {
     renderRows()
     set.data.wifi = set.data.net.available ? await tv.wifiNetworks(false) : []
   } else if (id === 'bluetooth') set.data.bt = await tv.bluetooth()
+  else if (id === 'system') set.data.menu = await tv.menuEntry()
   if (S.set !== set || section().id !== id) return
   renderRows()
 }
@@ -650,6 +651,18 @@ function buildRows() {
   if (id === 'system') {
     if (S.caps.omarchyMenu) rows.push({ id: 'omarchy', icon: 'menu', label: 'Omarchy menu', hint: 'Themes, fonts, updates, display and everything else', act: () => runAction('omarchy.menu') })
     rows.push({ id: 'theme', icon: 'palette', label: 'Theme', value: (S.theme && S.theme.name || '').toUpperCase(), hint: 'Follows Omarchy — change it from the Omarchy menu', act: () => S.caps.omarchyMenu && runAction('omarchy.menu') })
+    const menu = S.set.data.menu
+    if (menu) {
+      rows.push({
+        id: 'menu-entry', icon: 'apps', label: 'Show in system menu', toggle: menu.installed,
+        hint: menu.installed ? 'OMATVLauncher is in this machine\u2019s app menu' : 'Add OMATVLauncher to this machine\u2019s app menu',
+        act: async () => {
+          S.set.data.menu = await tv.setMenuEntry(!menu.installed)
+          toast(S.set.data.menu.installed ? 'Added to the system menu' : 'Removed from the system menu')
+          renderRows()
+        }
+      })
+    }
     rows.push({ id: 'hide', icon: 'x', label: 'Hide launcher', hint: 'Run OMATVLauncher again to bring it back', act: () => tv.hide() })
     rows.push({ id: 'quit', icon: 'logout', label: 'Quit launcher', danger: true, confirm: true, act: () => tv.quit() })
   }

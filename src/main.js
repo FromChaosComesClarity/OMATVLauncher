@@ -9,6 +9,7 @@ const { pathToFileURL } = require('node:url')
 const apps = require('./lib/apps')
 const system = require('./lib/system')
 const theme = require('./lib/theme')
+const desktop = require('./lib/desktop')
 const store = require('./lib/state')
 const { detach, which } = require('./lib/exec')
 
@@ -337,6 +338,9 @@ function wireIpc() {
     return r
   })
 
+  ipcMain.handle('menuEntry', () => desktop.status())
+  ipcMain.handle('setMenuEntry', (_e, on) => on ? desktop.install() : desktop.remove())
+
   ipcMain.handle('hide', () => hideHome())
   ipcMain.handle('quit', () => { app.isQuitting = true; app.quit() })
 }
@@ -358,6 +362,7 @@ if (!app.requestSingleInstanceLock()) {
     wireIpc()
     createWindow()
     apps.buildIconIndex()
+    if (!capture) desktop.keepCurrent().catch(() => {})
     theme.watch(t => {
       currentTheme = t
       if (win) {

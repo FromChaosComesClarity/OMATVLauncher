@@ -78,6 +78,11 @@ cp dist/OMATVLauncher-x86_64.AppImage ~/Applications/
 
 (It does not list itself, even from `~/Applications`.)
 
+Run it once, then turn on **Settings › System › Show in system menu**: that
+writes `~/.local/share/applications/omatvlauncher.desktop` and its icon, so it
+is in the Omarchy app menu from then on. The entry points at wherever the
+AppImage is, and follows it if you move it; turning the switch off removes it.
+
 It stays resident: running it again **toggles** it (`--show` and `--hide` do
 just that), and launching an app hides it. When an AppImage started from home
 exits, home comes back on its own.
