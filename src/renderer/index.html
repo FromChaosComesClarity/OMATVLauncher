@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>OMATVLauncher</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="booting">
+  <!-- Backdrop: the theme's wallpaper, blurred, with the focused app's colour
+       glowing through it. -->
+  <div id="backdrop">
+    <div id="wallpaper"></div>
+    <div id="ambient"></div>
+    <div id="shade"></div>
+  </div>
+
+  <main id="home">
+    <header id="topbar">
+      <div id="brand"><span class="brand-mark"></span>OMA<span>TV</span></div>
+      <div id="status"></div>
+      <div id="clock"><div id="time"></div><div id="date"></div></div>
+    </header>
+
+    <section id="hero">
+      <div id="hero-kind"></div>
+      <h1 id="hero-title"></h1>
+      <p id="hero-sub"></p>
+    </section>
+
+    <section id="shelves"></section>
+
+    <footer class="hints" id="home-hints"></footer>
+  </main>
+
+  <!-- Settings: a glass panel over home rather than a page of its own, so home
+       stays visible behind it and Esc feels like putting it down. -->
+  <section id="settings" class="layer" aria-hidden="true">
+    <div class="sheet">
+      <nav id="settings-nav"></nav>
+      <div id="settings-body">
+        <h2 id="settings-title"></h2>
+        <div id="settings-rows"></div>
+      </div>
+    </div>
+    <footer class="hints" id="settings-hints"></footer>
+  </section>
+
+  <section id="catalog" class="layer" aria-hidden="true">
+    <div class="catalog-head">
+      <h2>Add app</h2>
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="catalog-search" type="text" placeholder="Type to search everything installed" spellcheck="false" autocomplete="off">
+      </div>
+    </div>
+    <div id="catalog-grid"></div>
+    <footer class="hints" id="catalog-hints"></footer>
+  </section>
+
+  <div id="modal" class="layer" aria-hidden="true">
+    <div class="dialog">
+      <h3 id="modal-title"></h3>
+      <p id="modal-text"></p>
+      <input id="modal-input" type="password" spellcheck="false" autocomplete="off">
+      <div id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

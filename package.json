@@ -1,0 +1,44 @@
+{
+  "name": "omatvlauncher",
+  "productName": "OMATVLauncher",
+  "version": "0.1.0",
+  "description": "A full-screen home screen for an Omarchy machine plugged into a TV: your AppImages, anything installed, and the settings a living room needs.",
+  "main": "src/main.js",
+  "desktopName": "omatvlauncher.desktop",
+  "author": "FromChaosComesClarity",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/FromChaosComesClarity/OMATVLauncher",
+  "scripts": {
+    "postinstall": "node node_modules/electron/install.js",
+    "start": "electron .",
+    "dev": "electron . --windowed",
+    "dist": "electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "io.github.fromchaoscomesclarity.omatvlauncher",
+    "productName": "OMATVLauncher",
+    "artifactName": "OMATVLauncher-${arch}.${ext}",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility",
+      "icon": "build/icon.png",
+      "executableName": "omatvlauncher",
+      "syncDesktopName": true,
+      "desktop": {
+        "entry": {
+          "Name": "OMATVLauncher",
+          "Comment": "The TV home screen",
+          "StartupWMClass": "OMATVLauncher"
+        }
+      }
+    }
+  }
+}
