@@ -143,13 +143,13 @@ body.layered #home { transform: scale(.97); filter: blur(.5rem) brightness(.6); 
   color: var(--accent); margin-bottom: .9rem; height: 1rem;
 }
 #hero-title {
-  margin: 0; font-size: 5.4rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.02;
+  margin: 0 0 -.1em; font-size: 5.4rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.25; /* Poppins descends deep: room for g, y, p */
   text-shadow: 0 .4rem 2.5rem rgba(0,0,0,.45);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 #hero-sub {
   margin: 1rem 0 0; font-size: 1.35rem; color: color-mix(in srgb, var(--fg) 72%, transparent);
-  max-width: 60vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.7rem;
+  max-width: 60vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5; min-height: 2.03rem;
 }
 #hero.swap #hero-title, #hero.swap #hero-sub, #hero.swap #hero-kind { animation: heroIn .45s var(--ease); }
 @keyframes heroIn { from { opacity: 0; transform: translateY(.8rem); } to { opacity: 1; transform: none; } }
@@ -206,7 +206,7 @@ body.layered #home { transform: scale(.97); filter: blur(.5rem) brightness(.6); 
    (OmaCD Player and OmaMedia Player are both "OP"); a wordmark never does. */
 .wordmark {
   padding: 0 9%;
-  font-size: calc(var(--tile-h) * .17); font-weight: 800; letter-spacing: -.02em; line-height: 1.04;
+  font-size: calc(var(--tile-h) * .17); font-weight: 800; letter-spacing: -.02em; line-height: 1.2;
   text-align: center; color: rgba(255,255,255,.95);
   text-shadow: 0 .3rem 1.2rem rgba(0,0,0,.35);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
