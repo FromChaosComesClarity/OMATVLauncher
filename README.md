@@ -50,13 +50,23 @@ during an upgrade). Clarity opens in `--couch`, its own TV mode.
 |---|---|---|---|
 | Arrows | Move between tiles and shelves (up from Apps reaches the status chips) | Move; ←/→ adjust the volume | Move |
 | Enter | Open | Select | Add to home |
-| Del / Menu | Options: hide or remove | Options: forget a device or network | |
+| Del / Menu | Options: move, hide or remove | Options: forget a device or network | |
+| Shift + ←/→ | Move the focused app one place along the shelf | | |
 | A–Z | Jump to the next app starting with that letter | | Typing searches |
 | Esc | Hide the launcher | Back | Clear search, then close |
 
 The mouse does the same things: hover to focus, click to open, right-click for
-options, wheel to walk along a shelf. The cursor hides itself after three still
-seconds.
+options, wheel to walk along a shelf, and drag a tile to put it somewhere else.
+The cursor hides itself after three still seconds.
+
+### Arranging the apps
+
+The Apps shelf is in whatever order you leave it. **Options › Move** lifts the
+focused app: ←/→ carry it (Home/End to either end), Enter puts it down, Esc
+puts everything back as it was. Shift+←/→ does the same one step at a time
+without the mode, and dragging with the mouse works anywhere on the shelf. New
+AppImages and newly pinned apps join at the end; hidden ones keep their place
+for when they come back.
 
 ## Install
 
@@ -96,7 +106,8 @@ if you like:
   "version": 1,
   "pinned": [ { "id": "org.kde.krita", "label": "Krita" } ],
   "hidden": [ "/home/you/Applications/Something.AppImage" ],
-  "args":   { "/home/you/Applications/Clarity.AppImage": ["--couch"] }
+  "args":   { "/home/you/Applications/Clarity.AppImage": ["--couch"] },
+  "order":  [ "ai:/home/you/Applications/Clarity.AppImage", "de:org.kde.krita" ]
 }
 ```
 

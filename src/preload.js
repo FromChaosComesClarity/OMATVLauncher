@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('tv', {
   pin: entry => ipcRenderer.invoke('pin', entry),
   unpin: id => ipcRenderer.invoke('unpin', id),
   setHidden: (path, hidden) => ipcRenderer.invoke('setHidden', { path, hidden }),
+  setOrder: keys => ipcRenderer.invoke('setOrder', keys),
 
   status: () => ipcRenderer.invoke('status'),
   audio: () => ipcRenderer.invoke('audio'),

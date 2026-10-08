@@ -42,7 +42,15 @@ const startHidden = argv.includes('--hidden')
 const flag = name => { const a = argv.find(x => x.startsWith(name + '=')); return a ? a.slice(name.length + 1) : null }
 const capture = flag('--capture')
 const captureKeys = (flag('--capture-keys') || '').split(',').filter(Boolean)
-if (capture) app.setPath('userData', path.join(app.getPath('temp'), 'omatvlauncher-capture'))
+if (capture) {
+  const scratch = path.join(app.getPath('temp'), 'omatvlauncher-capture')
+  app.setPath('userData', scratch)
+  // Start from a copy of the real arrangement, then never write back to it.
+  const real = store.fileOf()
+  process.env.OMATV_CONFIG_DIR = path.join(scratch, 'config')
+  fs.mkdirSync(process.env.OMATV_CONFIG_DIR, { recursive: true })
+  try { fs.copyFileSync(real, store.fileOf()) } catch { try { fs.rmSync(store.fileOf()) } catch {} }
+}
 
 app.setName('OMATVLauncher')
 app.commandLine.appendSwitch('ozone-platform-hint', 'auto')
@@ -139,6 +147,17 @@ async function homeItems() {
       missing: !e, hidden: false
     })
   }
+
+  // The user's arrangement wins. Anything it does not mention yet — an
+  // AppImage dropped in since, an app just pinned — keeps its natural place
+  // relative to its neighbours and lands after the arranged ones.
+  const rank = new Map(state.order.map((k, i) => [k, i]))
+  const natural = new Map(items.map((it, i) => [it.key, i]))
+  items.sort((a, b) => {
+    const ra = rank.has(a.key) ? rank.get(a.key) : Infinity
+    const rb = rank.has(b.key) ? rank.get(b.key) : Infinity
+    return ra !== rb ? ra - rb : natural.get(a.key) - natural.get(b.key)
+  })
 
   lastItems = new Map(items.map(i => [i.key, i]))
   if (needExtract.length) extractInBackground(needExtract)
@@ -294,6 +313,13 @@ function wireIpc() {
   ipcMain.handle('setHidden', (_e, { path: p, hidden }) => {
     state.hidden = state.hidden.filter(h => h !== p)
     if (hidden) state.hidden.push(p)
+    store.save(state)
+    return { ok: true }
+  })
+
+  ipcMain.handle('setOrder', (_e, keys) => {
+    if (!Array.isArray(keys)) return { ok: false }
+    state.order = keys.filter(k => typeof k === 'string' && k)
     store.save(state)
     return { ok: true }
   })

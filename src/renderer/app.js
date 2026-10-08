@@ -23,6 +23,7 @@ const S = {
   tints: new Map(),
   mouse: false,
   home: { row: 0, cols: [0, 0], chip: 0, offsets: [0, 0] },
+  moving: null,
   shelves: [],
   set: null,
   cat: null,
@@ -145,9 +146,10 @@ function renderHome() {
   host.querySelectorAll('.tile').forEach(el => {
     const key = el.dataset.key
     wireTileImage(el, key)
-    el.addEventListener('mousemove', () => { if (S.mouse && topLayer() === 'home') focusTile(key) })
-    el.addEventListener('click', () => { focusTile(key); activateHome() })
+    el.addEventListener('mousemove', () => { if (S.mouse && topLayer() === 'home' && !S.moving) focusTile(key) })
+    el.addEventListener('click', () => { if (S.moving) { endMove(false); return } focusTile(key); activateHome() })
     el.addEventListener('contextmenu', e => { e.preventDefault(); focusTile(key); homeOptions() })
+    if (el.closest('.shelf.apps')) wireDrag(el, key)
   })
 
   // The first shelf can be empty; never leave the focus on nothing.
@@ -310,8 +312,116 @@ function homeOptions() {
   } else {
     buttons.push({ label: 'Remove from home', danger: true, act: async () => { await tv.unpin(item.id); toast(`${item.label} removed`); reloadHome() } })
   }
+  buttons.splice(1, 0, { label: 'Move', act: () => startMove() })
   buttons.push({ label: 'Cancel', act: () => {} })
   showSheet(item.label, item.kind === 'appimage' ? 'Hiding never touches the file in ~/Applications.' : 'It stays installed; this only takes it off the home screen.', buttons)
+}
+
+// ── Arranging the Apps shelf ────────────────────────────────────────────────
+//
+// Three ways in, one rule: the shelf as it looks is the order that is saved.
+// Move mode (from the Options sheet) lifts a tile and the arrows carry it;
+// Shift+←/→ nudges the focused tile without entering a mode; and the mouse
+// drags. Only the Apps shelf moves — System is the furniture.
+
+function appsShelf() { return S.shelves[0] }
+
+function startMove() {
+  const item = focusedItem()
+  if (!item || S.home.row !== 0) return
+  S.moving = { key: item.key, original: appsShelf().items.map(i => i.key) }
+  paintMoving()
+  renderHints()
+}
+
+function paintMoving() {
+  document.querySelectorAll('.tile.moving').forEach(el => el.classList.remove('moving'))
+  document.body.classList.toggle('arranging', !!S.moving)
+  if (!S.moving) return
+  const el = document.querySelector(`.tile[data-key="${CSS.escape(S.moving.key)}"]`)
+  if (el) el.classList.add('moving')
+}
+
+// Move a tile within the shelf: data, DOM and focus together, so the track
+// slides instead of re-rendering and every icon tint stays where it was.
+function shiftTile(key, to) {
+  const shelf = appsShelf()
+  const from = shelf.items.findIndex(i => i.key === key)
+  to = clamp(to, 0, shelf.items.length - 1)
+  if (from < 0 || from === to) return false
+  const [it] = shelf.items.splice(from, 1)
+  shelf.items.splice(to, 0, it)
+  const track = document.querySelector('.shelf.apps .track')
+  const el = track && track.querySelector(`.tile[data-key="${CSS.escape(key)}"]`)
+  if (el) {
+    track.removeChild(el)
+    track.insertBefore(el, track.children[to] || null)
+  }
+  S.home.row = 0
+  S.home.cols[0] = to
+  updateHomeFocus()
+  return true
+}
+
+// Hidden AppImages keep their place in the saved order, after the visible ones,
+// so un-hiding one does not throw it to the end of a shelf it was arranged in.
+async function saveOrder() {
+  const visible = appsShelf().items.map(i => i.key)
+  const hidden = S.items.filter(i => i.hidden).map(i => i.key)
+  await tv.setOrder(visible.concat(hidden))
+  const byKey = new Map(S.items.map(i => [i.key, i]))
+  S.items = visible.concat(hidden).map(k => byKey.get(k)).filter(Boolean)
+}
+
+function endMove(cancel) {
+  const m = S.moving
+  if (!m) return
+  S.moving = null
+  if (cancel) {
+    const shelf = appsShelf()
+    const byKey = new Map(shelf.items.map(i => [i.key, i]))
+    shelf.items = m.original.map(k => byKey.get(k)).filter(Boolean)
+    const track = document.querySelector('.shelf.apps .track')
+    if (track) for (const k of m.original) { const el = track.querySelector(`.tile[data-key="${CSS.escape(k)}"]`); if (el) track.appendChild(el) }
+    S.home.cols[0] = shelf.items.findIndex(i => i.key === m.key)
+    updateHomeFocus()
+  } else {
+    saveOrder()
+  }
+  paintMoving()
+  renderHints()
+}
+
+function nudge(delta) {
+  const item = focusedItem()
+  if (!item || S.home.row !== 0) return
+  if (shiftTile(item.key, S.home.cols[0] + delta)) saveOrder()
+}
+
+let dragKey = null
+function wireDrag(el, key) {
+  el.draggable = true
+  el.addEventListener('dragstart', e => {
+    dragKey = key
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', key)
+    focusTile(key)
+    S.moving = { key, original: appsShelf().items.map(i => i.key), drag: true }
+    paintMoving()
+  })
+  // Live reordering while dragging: the tiles part around the one in hand.
+  el.addEventListener('dragover', e => {
+    if (!dragKey || dragKey === key) return
+    e.preventDefault()
+    const to = appsShelf().items.findIndex(i => i.key === key)
+    shiftTile(dragKey, to)
+  })
+  el.addEventListener('drop', e => e.preventDefault())
+  el.addEventListener('dragend', () => {
+    const wasMoving = S.moving
+    dragKey = null
+    if (wasMoving && wasMoving.drag) endMove(false)
+  })
 }
 
 async function reloadHome(focusKey) {
@@ -891,7 +1001,9 @@ function topLayer() {
 
 function hints(list) { return list.map(([k, t]) => `<span><kbd>${k}</kbd>${t}</span>`).join('') }
 function renderHints() {
-  $('#home-hints').innerHTML = hints([['←↑→↓', 'Move'], ['Enter', 'Open'], ['Del', 'Options'], ['A–Z', 'Jump'], ['Esc', 'Hide']])
+  $('#home-hints').innerHTML = S.moving
+    ? hints([['← →', 'Move the app'], ['Enter', 'Done'], ['Esc', 'Cancel']])
+    : hints([['←↑→↓', 'Move'], ['Enter', 'Open'], ['Shift ←→', 'Reorder'], ['Del', 'Options'], ['Esc', 'Hide']])
   $('#settings-hints').innerHTML = hints([['↑↓', 'Move'], ['←→', 'Adjust'], ['Enter', 'Select'], ['Del', 'Options'], ['Esc', 'Back']])
   $('#catalog-hints').innerHTML = hints([['Type', 'Search'], ['←↑→↓', 'Move'], ['Enter', 'Add to home'], ['Esc', 'Close']])
 }
@@ -956,8 +1068,21 @@ function onKey(e) {
     return
   }
 
+  // Home, carrying a tile
+  if (S.moving) {
+    if (k === 'ArrowLeft') shiftTile(S.moving.key, S.home.cols[0] - 1)
+    else if (k === 'ArrowRight') shiftTile(S.moving.key, S.home.cols[0] + 1)
+    else if (k === 'Home') shiftTile(S.moving.key, 0)
+    else if (k === 'End') shiftTile(S.moving.key, appsShelf().items.length - 1)
+    else if (k === 'Enter' || k === ' ') endMove(false)
+    else if (k === 'Escape' || k === 'Backspace') endMove(true)
+    e.preventDefault()
+    return
+  }
+
   // Home
-  if (k === 'ArrowLeft') moveHome(0, -1)
+  if (e.shiftKey && (k === 'ArrowLeft' || k === 'ArrowRight')) nudge(k === 'ArrowLeft' ? -1 : 1)
+  else if (k === 'ArrowLeft') moveHome(0, -1)
   else if (k === 'ArrowRight') moveHome(0, 1)
   else if (k === 'ArrowUp') moveHome(-1, 0)
   else if (k === 'ArrowDown') moveHome(1, 0)
@@ -991,7 +1116,8 @@ function onWheel(e) {
   if (Math.abs(wheelAcc) < 60) return
   const step = wheelAcc > 0 ? 1 : -1
   wheelAcc = 0
-  if (layer === 'home' && S.home.row >= 0) moveHome(0, step)
+  if (layer === 'home' && S.moving && !S.moving.drag) shiftTile(S.moving.key, S.home.cols[0] + step)
+  else if (layer === 'home' && S.home.row >= 0) moveHome(0, step)
   else if (layer === 'settings' && S.set.area === 'rows') moveRows(step)
   else if (layer === 'settings') { S.set.area = 'rows'; moveRows(step) }
   else if (layer === 'catalog') moveCatalog(step * CAT_COLS)
@@ -1013,6 +1139,7 @@ function toast(text, bad) {
 
 async function onShown() {
   document.body.classList.remove('launching')
+  if (S.moving) endMove(true)
   // The folder is the configuration, so it is re-read every time home comes
   // back: an AppImage dropped in while an app was running is already a tile.
   await reloadHome()

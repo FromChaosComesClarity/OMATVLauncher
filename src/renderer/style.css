@@ -230,6 +230,27 @@ body.layered #home { transform: scale(.97); filter: blur(.5rem) brightness(.6); 
 .tile.focus .art img { transform: scale(1.06); }
 .tile.focus .tile-label { color: var(--fg); }
 .tile.missing { opacity: .45; }
+
+/* Arranging: the tile in hand floats above the shelf with arrows either side,
+   and the rest of the shelf steps back so it is obvious what will move. */
+body.arranging .shelf.apps .tile:not(.moving) { opacity: .5; transform: scale(.96); }
+body.arranging .shelf.system { opacity: .3; }
+.tile.moving { transform: scale(1.1) translateY(-1.1rem) !important; opacity: 1 !important; z-index: 3; }
+.tile.moving .art {
+  box-shadow:
+    0 0 0 .22rem var(--accent),
+    0 0 0 .6rem color-mix(in srgb, var(--accent) 22%, transparent),
+    0 2.4rem 4rem rgba(0,0,0,.6);
+}
+.tile.moving::before, .tile.moving::after {
+  position: absolute; top: calc(var(--tile-h) / 2 - .9rem);
+  font-size: 1.6rem; font-weight: 800; color: var(--accent);
+  animation: nudge 1.1s ease-in-out infinite;
+}
+.tile.moving::before { content: "‹"; left: -1.7rem; }
+.tile.moving::after { content: "›"; right: -1.7rem; animation-direction: reverse; }
+@keyframes nudge { 50% { transform: translateX(-.3rem); } }
+.track .tile { transition: transform .35s var(--spring), opacity .3s; }
 .tile.pressed { transform: scale(1.02); transition-duration: .12s; }
 @keyframes sheen { to { transform: translateX(120%); } }
 
