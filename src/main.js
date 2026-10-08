@@ -165,7 +165,8 @@ async function catalog() {
   const pinned = new Set(state.pinned.map(p => p.id))
   const out = []
   for (const e of ents) {
-    if (pinned.has(e.id)) continue
+    // Its own menu entry is not an app to pin on its own home screen.
+    if (pinned.has(e.id) || e.id === 'omatvlauncher' || /OMATVLauncher/i.test(e.exec)) continue
     out.push({ id: e.id, label: e.label, sub: e.comment, icon: fileUrl(await apps.resolveIcon(e.icon)) })
   }
   return out
